@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class FleXES {
 
@@ -228,4 +229,16 @@ public class FleXES {
 
     	return result;
     }
+
+	public static NavigableMap<Integer, Integer> traceLengthHistogram(XLog log) {
+
+		NavigableMap<Integer, Integer> result = new TreeMap<>();
+
+		for (int t = 0; t < log.size(); t++) {
+			XTrace trace = log.get(t);
+			result.compute(trace.size(), (k,v) -> v == null ? 1 : v + 1);
+		}
+
+		return result;
+	}
 }
