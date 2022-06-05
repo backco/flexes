@@ -8,9 +8,11 @@ import org.deckfour.xes.model.XAttribute;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
+import org.deckfour.xes.out.XesXmlSerializer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -228,6 +230,23 @@ public class FleXES {
 	}
 
     	return result;
+    }
+
+    public static void mergeAndSerialize( NavigableMap<String, XLog> logs, OutputStream os) throws IOException {
+
+	XFactory factory = new XFactoryBufferedImpl();
+	XLog     result  = factory.createLog();
+
+	for ( Map.Entry<String, XLog> e : logs.entrySet() ) {
+
+	    XLog   log      = e.getValue();
+
+	    for ( XTrace t : log ) {
+		result.add(t);
+	    }
+	}
+	XesXmlSerializer serializer = new XesXmlSerializer();
+	serializer.serialize(result, os);
     }
 
 	public static NavigableMap<Integer, Integer> traceLengthHistogram(XLog log) {

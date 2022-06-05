@@ -3,7 +3,11 @@ import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.junit.jupiter.api.Test;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -37,6 +41,27 @@ public class FleXESUnitTest {
 
         for ( XTrace t : merged) {
             System.out.println(t.hashCode() + ": " + t.getAttributes().get("sublog"));
+        }
+    }
+
+    @Test
+    void mergeAndSerialize() throws IOException {
+
+        String prefix = "round 5 treeSeed ";
+        String suffix = ".ptml.tree-logRound13-noiseRound";
+
+        for (int model = 1; model <= 10; model++) {
+
+            NavigableMap<String, XLog> logMap = new TreeMap<>();
+
+            for ( int i = 0; i <= 13; i++ ) {
+                String filename = prefix + model + suffix + i + ".xes";
+                XLog l = FleXES.loadXES(filename);
+                logMap.put(filename, l);
+            }
+
+            OutputStream os = Files.newOutputStream(Paths.get(prefix + model + suffix + "ALL.xes"));
+            FleXES.mergeAndSerialize(logMap, os);
         }
     }
 
