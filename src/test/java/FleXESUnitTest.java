@@ -61,8 +61,29 @@ public class FleXESUnitTest {
             }
 
             OutputStream os = Files.newOutputStream(Paths.get(prefix + model + suffix + "ALL.xes"));
-            FleXES.mergeAndSerialize(logMap, os);
+            FleXES.mergeAndSerialize(logMap, os, false);
         }
+    }
+
+    @Test
+    void mergeAndSerialize2() throws IOException {
+
+        String prefix = "/home/tuck/code/process-similarity-metrics/logs/round 5 treeSeed ";
+        String suffix = ".ptml.tree-logRound13-noiseRound";
+
+        NavigableMap<String, XLog> logMap = new TreeMap<>();
+
+        for (int model = 1; model <= 10; model++) {
+
+            System.out.println("loading original log" + model + " of 10");
+
+                String filename = prefix + model + suffix + "ALL.xes";
+                XLog l = FleXES.loadXES(filename);
+                logMap.put(filename, l);
+        }
+
+        OutputStream os = Files.newOutputStream(Paths.get(prefix + "ALL" + suffix + "ALL.xes"));
+        FleXES.mergeAndSerialize(logMap, os, true);
     }
 
 }

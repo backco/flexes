@@ -232,16 +232,32 @@ public class FleXES {
     	return result;
     }
 
-    public static void mergeAndSerialize( NavigableMap<String, XLog> logs, OutputStream os) throws IOException {
+    public static void mergeAndSerialize( NavigableMap<String, XLog> logs, OutputStream os, boolean labelSubLog) throws IOException {
 
 	XFactory factory = new XFactoryBufferedImpl();
 	XLog     result  = factory.createLog();
 
+	int i = 0;
+
 	for ( Map.Entry<String, XLog> e : logs.entrySet() ) {
 
+		i++;
+
+		String logName = e.getKey();
 	    XLog   log      = e.getValue();
 
+		int j = 0;
+
 	    for ( XTrace t : log ) {
+
+			j++;
+
+			System.out.println("merging log " + i + " of " + logs.keySet().size() + ", trace " + j + " of " + log.size());
+
+			if (labelSubLog) {
+				XAttribute xa = factory.createAttributeLiteral("sublog", logName, null);
+				t.getAttributes().put("sublog", xa);
+			}
 		result.add(t);
 	    }
 	}
