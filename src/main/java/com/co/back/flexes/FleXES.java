@@ -232,7 +232,7 @@ public class FleXES {
     	return result;
     }
 
-    public static void mergeAndSerialize( NavigableMap<String, XLog> logs, OutputStream os, boolean labelSubLog) throws IOException {
+    public static void mergeAndSerialize( NavigableMap<String, XLog> logs, OutputStream os, boolean labelSubLog, String filterKey, String filterValue) throws IOException {
 
 	XFactory factory = new XFactoryBufferedImpl();
 	XLog     result  = factory.createLog();
@@ -254,11 +254,21 @@ public class FleXES {
 
 			System.out.println("merging log " + i + " of " + logs.keySet().size() + ", trace " + j + " of " + log.size());
 
+			/*
+			System.out.println("filterKey: " + filterKey);
+			System.out.println("filterValue: " + filterValue);
+			System.out.println(t.getAttributes().get(filterKey).toString());
+			System.out.println("t.getAttributes().containsKey(filterKey) && t.getAttributes().get(filterKey).equals(filterValue): " + (t.getAttributes().containsKey(filterKey) && t.getAttributes().get(filterKey).toString().equals(filterValue)));
+			*/
+
+			if ((filterKey == null && filterValue == null) || (filterKey != null && filterValue != null && (t.getAttributes().containsKey(filterKey) && t.getAttributes().get(filterKey).toString().equals(filterValue)))) {
+				result.add(t);
+			}
+
 			if (labelSubLog) {
 				XAttribute xa = factory.createAttributeLiteral("sublog", logName, null);
 				t.getAttributes().put("sublog", xa);
 			}
-		result.add(t);
 	    }
 	}
 	XesXmlSerializer serializer = new XesXmlSerializer();
