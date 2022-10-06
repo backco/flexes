@@ -1,3 +1,5 @@
+package com.co.back.flexes;
+
 import com.co.back.flexes.FleXES;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
@@ -16,10 +18,21 @@ import java.util.TreeMap;
 public class FleXESUnitTest {
 
     @Test
+    void loadMXML() throws IOException {
+
+        XLog log = FleXES.loadEventLog("cb2.5k.mxml");
+
+        log.forEach( t -> {
+            System.out.println(t.getAttributes().get("concept:name"));
+            t.forEach(e -> System.out.println("   " + e.getAttributes().get("concept:name") + "-" + e.getAttributes().get("lifecycle:transition")));
+        });
+    }
+
+    @Test
     void mergeTest() throws IOException {
 
-        XLog l1 = FleXES.loadXES("pdc2021_000000.xes");
-        XLog l2 = FleXES.loadXES("pdc2021_000001.xes");
+        XLog l1 = FleXES.loadEventLog("pdc2021_000000.xes");
+        XLog l2 = FleXES.loadEventLog("pdc2021_000001.xes");
 
         NavigableMap<String, XLog> logMap = new TreeMap<>();
         logMap.put("pdc2021_000000.xes", l1);
@@ -56,7 +69,7 @@ public class FleXESUnitTest {
 
             for ( int i = 0; i <= 13; i++ ) {
                 String filename = prefix + model + suffix + i + ".xes";
-                XLog l = FleXES.loadXES(filename);
+                XLog l = FleXES.loadEventLog(filename);
                 logMap.put(filename, l);
             }
 
@@ -75,10 +88,10 @@ public class FleXESUnitTest {
 
         for (int model = 1; model <= 10; model++) {
 
-            System.out.println("loading original log" + model + " of 10");
+            System.out.println("loading original log " + model + " of 10");
 
                 String filename = prefix + model + suffix + "ALL.xes";
-                XLog l = FleXES.loadXES(filename);
+                XLog l = FleXES.loadEventLog(filename);
                 logMap.put(filename, l);
         }
 
@@ -87,7 +100,7 @@ public class FleXESUnitTest {
     }
 
     @Test
-    void mergeAndSerialize3() throws IOException {
+    void mergeAndSerialize3() throws IOException    {
 
         String[] files = {
         "pdc2021_000000.xes",
@@ -193,11 +206,30 @@ public class FleXESUnitTest {
 
         for (String f : files) {
             String filename = prefix + f;
-            XLog l = FleXES.loadXES(filename);
+            XLog l = FleXES.loadEventLog(filename);
             logMap.put(filename, l);
         }
 
         OutputStream os = Files.newOutputStream(Paths.get(prefix + "pdc2021ALL.xes"));
-        FleXES.mergeAndSerialize(logMap, os, true, "label", "Required");
+        FleXES.mergeAndSerialize(logMap, os, false, null, null);
+    }
+
+    @Test
+    void liveobjectTest() throws IOException, InterruptedException {
+
+        System.out.print("loading log...");
+
+        load();
+
+        System.out.print("done");
+
+        Thread.sleep(60000);
+    }
+
+    private void load() throws IOException {
+
+        XLog log = FleXES.loadEventLog("/home/tuck/code/process-similarity-metrics/logs/round_5_treeSeed_ALL.ptml.tree-logRound13-noiseRoundALL.xes");
+        log.clear();
+        System.gc();
     }
 }

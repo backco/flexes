@@ -2,6 +2,8 @@ package com.co.back.flexes;
 
 import org.deckfour.xes.factory.XFactory;
 import org.deckfour.xes.factory.XFactoryBufferedImpl;
+import org.deckfour.xes.in.XMxmlParser;
+import org.deckfour.xes.in.XParser;
 import org.deckfour.xes.in.XesXmlGZIPParser;
 import org.deckfour.xes.in.XesXmlParser;
 import org.deckfour.xes.model.XAttribute;
@@ -29,7 +31,7 @@ public class FleXES {
 
     public static Map<String, Set<String>> eventAttributes (String path) throws IOException {
 
-        XLog log = loadXES(path);
+        XLog log = loadEventLog(path);
 
         return eventAttributes(log);
     }
@@ -52,7 +54,7 @@ public class FleXES {
 
     public static Map<String, Set<String>> traceAttributes (String path) throws IOException {
 
-	XLog log = loadXES(path);
+	XLog log = loadEventLog(path);
 
 	return traceAttributes(log);
     }
@@ -76,12 +78,17 @@ public class FleXES {
 	final File file = read(path);
 	final XesXmlParser xesXmlParser = new XesXmlParser();
 	final XesXmlGZIPParser xesXmlGZIPParser = new XesXmlGZIPParser();
+	final XMxmlParser mxmlParser = new XMxmlParser();
 
 	if (xesXmlParser.canParse(file)) {
 
 	    return true;
 
 	} else if (xesXmlGZIPParser.canParse(file)) {
+
+	    return true;
+
+	} else if (mxmlParser.canParse(file)) {
 
 	    return true;
 
@@ -92,7 +99,7 @@ public class FleXES {
 
     }
 
-    private static List<XLog> load(String path, PrintStream ps) throws IOException {
+    static List<XLog> load ( String path, PrintStream ps ) throws IOException {
 
 	final PrintStream psOrig = System.out;
 	System.setOut(ps);
@@ -102,6 +109,7 @@ public class FleXES {
 	List<XLog>             xLogs            = null;
 	final XesXmlParser     xesXmlParser     = new XesXmlParser();
 	final XesXmlGZIPParser xesXmlGZIPParser = new XesXmlGZIPParser();
+	final XMxmlParser      mxmlParser       = new XMxmlParser();
 
 	if (xesXmlParser.canParse(file)) {
 
@@ -110,6 +118,10 @@ public class FleXES {
 	} else if (xesXmlGZIPParser.canParse(file)) {
 
 	    xLogs = parse(file, xesXmlGZIPParser);
+
+	} else if (mxmlParser.canParse(file)) {
+
+	    xLogs = parse(file, mxmlParser);
 
 	} else {
 	    throw new IOException("file format cannot be parsed");
@@ -121,18 +133,18 @@ public class FleXES {
 	return xLogs;
     }
 
-    public static XLog loadXES(String logPath) throws IOException {
+    public static XLog loadEventLog(String logPath) throws IOException {
 
-	return loadXES(logPath, false, System.out);
+	return loadEventLog(logPath, false, System.out);
     }
 
-    public static XLog loadXES(String logPath, boolean sortByTimeStamp, PrintStream ps) throws IOException {
+    public static XLog loadEventLog(String logPath, boolean sortByTimeStamp, PrintStream ps) throws IOException {
 
 	final File f = new File(logPath);
 
 	if (f.isFile()) {
 
-	    if (logPath.toLowerCase().endsWith("xes") || logPath.toLowerCase().endsWith("gz")) {
+	    if (logPath.toLowerCase().endsWith("mxml") || logPath.toLowerCase().endsWith("xes") || logPath.toLowerCase().endsWith("gz")) {
 
 		if (canParse(logPath)) {
 
@@ -157,7 +169,7 @@ public class FleXES {
 	}
     }
 
-    private static List<XLog> parse(File file, XesXmlGZIPParser parser) throws IOException {
+    private static List<XLog> parse(File file, XParser parser) throws IOException {
 
 	List<XLog> xLogs = null;
 
@@ -170,7 +182,7 @@ public class FleXES {
 
 	return xLogs;
     }
-
+/*
     private static List<XLog> parse(File file, XesXmlParser parser) throws IOException {
 
 	List<XLog> xLogs = null;
@@ -184,7 +196,7 @@ public class FleXES {
 
 	return xLogs;
     }
-
+*/
     private static File read(String path) throws IOException {
 
 	File file = null;
