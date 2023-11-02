@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -297,5 +298,44 @@ public class FleXES {
 		}
 
 		return result;
+	}
+
+	public static void mergeAndSerializeByCondition (OutputStream os, Map<String,List<XLog>> logs, String attribute, Set<String> values, String newAttribute, String defaultValue) throws IOException {
+
+	    XFactory factory = new XFactoryBufferedImpl();
+	    XLog     result  = factory.createLog();
+
+	    List<String> prefixes = new ArrayList<>();
+
+	    for (String filename : logs.keySet()) {
+		for ( XLog l : logs.get(filename) ) {
+		    for ( XTrace t : l ) {
+			//if (t.getAttributes().get("concept:name").toString().contains("_")) {
+			//if (!prefixes.contains(t.getAttributes().get("concept:name").toString().split("_")[0])) {prefixes.add(t.getAttributes().get("concept:name").toString().split("_")[0]);}
+			//}
+			boolean satisfied = false;
+
+			for ( String v : values ) {
+			    if ( t.getAttributes().get(attribute).toString().contains(v) ) {
+				XAttribute xa = factory.createAttributeLiteral(newAttribute, filename, null);
+				t.getAttributes().put(newAttribute, xa);
+				satisfied = true;
+			    }
+			}
+
+			if ( !satisfied ) {
+			    XAttribute xa = factory.createAttributeLiteral(newAttribute, defaultValue, null);
+			    t.getAttributes().put(newAttribute, xa);
+			}
+
+			result.add(t);
+		    }
+		}
+	    }
+
+	    XesXmlSerializer serializer = new XesXmlSerializer();
+	    serializer.serialize(result, os);
+
+	    System.out.println(prefixes);
 	}
 }
