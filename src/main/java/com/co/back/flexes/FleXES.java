@@ -28,24 +28,24 @@ import java.util.TreeMap;
 
 public class FleXES {
 
-    public static final String	TIMESTAMP	= "time:timestamp";
+    public static final String TIMESTAMP = "time:timestamp";
 
-    public static Map<String, Set<String>> eventAttributes (String path) throws IOException {
+    public static Map<String, Set<String>> eventAttributes ( String path ) throws IOException {
 
-        XLog log = loadEventLog(path);
+	XLog log = loadEventLog(path);
 
-        return eventAttributes(log);
+	return eventAttributes(log);
     }
 
-    public static Map<String, Set<String>> eventAttributes (XLog log) {
+    public static Map<String, Set<String>> eventAttributes ( XLog log ) {
 
 	Map<String, Set<String>> attributes = new HashMap<>();
 
-	for (XTrace t : log) {
-	    for ( XEvent e : t) {
-	        for ( Map.Entry<String, XAttribute> xa : e.getAttributes().entrySet()) {
+	for ( XTrace t : log ) {
+	    for ( XEvent e : t ) {
+		for ( Map.Entry<String, XAttribute> xa : e.getAttributes().entrySet() ) {
 		    XAttribute att = xa.getValue();
-	            attributes.computeIfAbsent(att.getKey(), v -> new HashSet<>()).add(att.toString());
+		    attributes.computeIfAbsent(att.getKey(), v -> new HashSet<>()).add(att.toString());
 		}
 	    }
 	}
@@ -53,20 +53,20 @@ public class FleXES {
 	return attributes;
     }
 
-    public static Map<String, Set<String>> traceAttributes (String path) throws IOException {
+    public static Map<String, Set<String>> traceAttributes ( String path ) throws IOException {
 
 	XLog log = loadEventLog(path);
 
 	return traceAttributes(log);
     }
 
-    public static Map<String, Set<String>> traceAttributes (XLog log) {
+    public static Map<String, Set<String>> traceAttributes ( XLog log ) {
 
 	Map<String, Set<String>> attributes = new HashMap<>();
 
 	for ( XTrace t : log ) {
 	    for ( Map.Entry<String, XAttribute> xa : t.getAttributes().entrySet() ) {
-	        //XAttribute att = xa.getValue();
+		//XAttribute att = xa.getValue();
 		attributes.computeIfAbsent(xa.getKey(), v -> new HashSet<>()).add(xa.getValue().toString());
 	    }
 	}
@@ -74,22 +74,22 @@ public class FleXES {
 	return attributes;
     }
 
-    public static boolean canParse(String path) throws IOException {
+    public static boolean canParse ( String path ) throws IOException {
 
-	final File file = read(path);
-	final XesXmlParser xesXmlParser = new XesXmlParser();
+	final File             file             = read(path);
+	final XesXmlParser     xesXmlParser     = new XesXmlParser();
 	final XesXmlGZIPParser xesXmlGZIPParser = new XesXmlGZIPParser();
-	final XMxmlParser mxmlParser = new XMxmlParser();
+	final XMxmlParser      mxmlParser       = new XMxmlParser();
 
-	if (xesXmlParser.canParse(file)) {
-
-	    return true;
-
-	} else if (xesXmlGZIPParser.canParse(file)) {
+	if ( xesXmlParser.canParse(file) ) {
 
 	    return true;
 
-	} else if (mxmlParser.canParse(file)) {
+	} else if ( xesXmlGZIPParser.canParse(file) ) {
+
+	    return true;
+
+	} else if ( mxmlParser.canParse(file) ) {
 
 	    return true;
 
@@ -112,15 +112,15 @@ public class FleXES {
 	final XesXmlGZIPParser xesXmlGZIPParser = new XesXmlGZIPParser();
 	final XMxmlParser      mxmlParser       = new XMxmlParser();
 
-	if (xesXmlParser.canParse(file)) {
+	if ( xesXmlParser.canParse(file) ) {
 
 	    xLogs = parse(file, xesXmlParser);
 
-	} else if (xesXmlGZIPParser.canParse(file)) {
+	} else if ( xesXmlGZIPParser.canParse(file) ) {
 
 	    xLogs = parse(file, xesXmlGZIPParser);
 
-	} else if (mxmlParser.canParse(file)) {
+	} else if ( mxmlParser.canParse(file) ) {
 
 	    xLogs = parse(file, mxmlParser);
 
@@ -134,24 +134,24 @@ public class FleXES {
 	return xLogs;
     }
 
-    public static XLog loadEventLog(String logPath) throws IOException {
+    public static XLog loadEventLog ( String logPath ) throws IOException {
 
 	return loadEventLog(logPath, false, System.out);
     }
 
-    public static XLog loadEventLog(String logPath, boolean sortByTimeStamp, PrintStream ps) throws IOException {
+    public static XLog loadEventLog ( String logPath, boolean sortByTimeStamp, PrintStream ps ) throws IOException {
 
 	final File f = new File(logPath);
 
-	if (f.isFile()) {
+	if ( f.isFile() ) {
 
-	    if (logPath.toLowerCase().endsWith("mxml") || logPath.toLowerCase().endsWith("xes") || logPath.toLowerCase().endsWith("gz")) {
+	    if ( logPath.toLowerCase().endsWith("mxml") || logPath.toLowerCase().endsWith("xes") || logPath.toLowerCase().endsWith("gz") ) {
 
-		if (canParse(logPath)) {
+		if ( canParse(logPath) ) {
 
 		    final XLog log = load(logPath, ps).get(0);
 
-		    if (sortByTimeStamp) {
+		    if ( sortByTimeStamp ) {
 			sortByTimeStamp(log);
 		    }
 
@@ -170,82 +170,83 @@ public class FleXES {
 	}
     }
 
-    private static List<XLog> parse(File file, XParser parser) throws IOException {
+    private static List<XLog> parse ( File file, XParser parser ) throws IOException {
 
 	List<XLog> xLogs = null;
 
 	try {
 	    xLogs = parser.parse(file);
-	} catch (final Exception e) {
+	} catch ( final Exception e ) {
 	    e.printStackTrace();
 	    throw new IOException("problem parsing file (GZIP): " + file.getAbsolutePath());
 	}
 
 	return xLogs;
     }
-/*
-    private static List<XLog> parse(File file, XesXmlParser parser) throws IOException {
 
-	List<XLog> xLogs = null;
+    /*
+	private static List<XLog> parse(File file, XesXmlParser parser) throws IOException {
 
-	try {
-	    xLogs = parser.parse(file);
+	    List<XLog> xLogs = null;
 
-	} catch (final Exception e) {
-	    throw new IOException("problem parsing file: " + file.getAbsolutePath());
+	    try {
+		xLogs = parser.parse(file);
+
+	    } catch (final Exception e) {
+		throw new IOException("problem parsing file: " + file.getAbsolutePath());
+	    }
+
+	    return xLogs;
 	}
-
-	return xLogs;
-    }
-*/
-    private static File read(String path) throws IOException {
+    */
+    private static File read ( String path ) throws IOException {
 
 	File file = null;
 
 	try {
 	    file = new File(path);
-	} catch (final NullPointerException e) {
+	} catch ( final NullPointerException e ) {
 	    throw new IOException("problem loading file: " + path);
 	}
 
 	return file;
     }
 
-    public static void sortByTimeStamp(XLog l) {
+    public static void sortByTimeStamp ( XLog l ) {
 
-	for (final XTrace t : l) {
+	for ( final XTrace t : l ) {
 	    sortByTimeStamp(t);
 	}
 
-	l.sort((x, y) -> ZonedDateTime.parse(x.get(0).getAttributes().get(TIMESTAMP).toString()).compareTo(ZonedDateTime.parse(y.get(0).getAttributes().get(TIMESTAMP).toString())));
+	l.sort(( x, y ) -> ZonedDateTime.parse(x.get(0).getAttributes().get(TIMESTAMP).toString()).compareTo(ZonedDateTime.parse(y.get(0).getAttributes().get(TIMESTAMP).toString())));
     }
 
-    public static void sortByTimeStamp(XTrace t) {
+    public static void sortByTimeStamp ( XTrace t ) {
 
-	t.sort((x, y) -> ZonedDateTime.parse(x.getAttributes().get(TIMESTAMP).toString()).compareTo(ZonedDateTime.parse(y.getAttributes().get(TIMESTAMP).toString())));
+	t.sort(( x, y ) -> ZonedDateTime.parse(x.getAttributes().get(TIMESTAMP).toString()).compareTo(ZonedDateTime.parse(y.getAttributes().get(TIMESTAMP).toString())));
     }
 
-    public static XLog merge( NavigableMap<String, XLog> logs) {
+    public static XLog merge ( NavigableMap<String, XLog> logs ) {
 
-    	XFactory factory = new XFactoryBufferedImpl();
-    	XLog result = factory.createLog();
+	XFactory factory = new XFactoryBufferedImpl();
+	XLog     result  = factory.createLog();
 
-    	for ( Map.Entry<String, XLog> e : logs.entrySet()) {
+	for ( Map.Entry<String, XLog> e : logs.entrySet() ) {
 
 	    String filename = e.getKey();
 	    XLog   log      = e.getValue();
 
-    	    for (XTrace t : log) {
-    	        XAttribute a = factory.createAttributeLiteral("sublog", filename, null);
-    	        t.getAttributes().put("sublog", a);
-    	        result.add(t);
+	    for ( XTrace t : log ) {
+		XAttribute a = factory.createAttributeLiteral("sublog", filename, null);
+		t.getAttributes().put("sublog", a);
+		result.add(t);
 	    }
 	}
 
-    	return result;
+	return result;
     }
 
-    public static void mergeAndSerialize( NavigableMap<String, XLog> logs, OutputStream os, boolean labelSubLog, String filterKey, String filterValue) throws IOException {
+    public static void mergeAndSerialize ( NavigableMap<String, XLog> logs, OutputStream os, boolean labelSubLog, String filterKey, String filterValue ) throws IOException {
 
 	XFactory factory = new XFactoryBufferedImpl();
 	XLog     result  = factory.createLog();
@@ -254,18 +255,18 @@ public class FleXES {
 
 	for ( Map.Entry<String, XLog> e : logs.entrySet() ) {
 
-		i++;
+	    i++;
 
-		String logName = e.getKey();
-	    XLog   log      = e.getValue();
+	    String logName = e.getKey();
+	    XLog   log     = e.getValue();
 
-		int j = 0;
+	    int j = 0;
 
 	    for ( XTrace t : log ) {
 
-			j++;
+		j++;
 
-			System.out.println("merging log " + i + " of " + logs.keySet().size() + ", trace " + j + " of " + log.size());
+		System.out.println("merging log " + i + " of " + logs.keySet().size() + ", trace " + j + " of " + log.size());
 
 			/*
 			System.out.println("filterKey: " + filterKey);
@@ -274,68 +275,69 @@ public class FleXES {
 			System.out.println("t.getAttributes().containsKey(filterKey) && t.getAttributes().get(filterKey).equals(filterValue): " + (t.getAttributes().containsKey(filterKey) && t.getAttributes().get(filterKey).toString().equals(filterValue)));
 			*/
 
-			if ((filterKey == null && filterValue == null) || (filterKey != null && filterValue != null && (t.getAttributes().containsKey(filterKey) && t.getAttributes().get(filterKey).toString().equals(filterValue)))) {
-				result.add(t);
-			}
+		if ( ( filterKey == null && filterValue == null ) || ( filterKey != null && filterValue != null && ( t.getAttributes().containsKey(filterKey) && t.getAttributes().get(filterKey).toString().equals(filterValue) ) ) ) {
+		    result.add(t);
+		}
 
-			if (labelSubLog) {
-				XAttribute xa = factory.createAttributeLiteral("sublog", logName, null);
-				t.getAttributes().put("sublog", xa);
-			}
+		if ( labelSubLog ) {
+		    XAttribute xa = factory.createAttributeLiteral("sublog", logName, null);
+		    t.getAttributes().put("sublog", xa);
+		}
 	    }
 	}
 	XesXmlSerializer serializer = new XesXmlSerializer();
 	serializer.serialize(result, os);
     }
 
-	public static NavigableMap<Integer, Integer> traceLengthHistogram(XLog log) {
+    public static NavigableMap<Integer, Integer> traceLengthHistogram ( XLog log ) {
 
-		NavigableMap<Integer, Integer> result = new TreeMap<>();
+	NavigableMap<Integer, Integer> result = new TreeMap<>();
 
-		for (int t = 0; t < log.size(); t++) {
-			XTrace trace = log.get(t);
-			result.compute(trace.size(), (k,v) -> v == null ? 1 : v + 1);
-		}
-
-		return result;
+	for ( int t = 0; t < log.size(); t++ ) {
+	    XTrace trace = log.get(t);
+	    result.compute(trace.size(), ( k, v ) -> v == null ? 1 : v + 1);
 	}
 
-	public static void mergeAndSerializeByCondition (OutputStream os, Map<String,List<XLog>> logs, String attribute, Set<String> values, String newAttribute, String defaultValue) throws IOException {
+	return result;
+    }
 
-	    XFactory factory = new XFactoryBufferedImpl();
-	    XLog     result  = factory.createLog();
+    public static void mergeAndSerializeByCondition ( OutputStream os, Map<String, List<XLog>> logs, String attribute, Set<String> values, String newAttribute, String defaultValue ) throws IOException {
 
-	    List<String> prefixes = new ArrayList<>();
+	XFactory factory = new XFactoryBufferedImpl();
+	XLog     result  = factory.createLog();
 
-	    for (String filename : logs.keySet()) {
-		for ( XLog l : logs.get(filename) ) {
-		    for ( XTrace t : l ) {
-			//if (t.getAttributes().get("concept:name").toString().contains("_")) {
-			//if (!prefixes.contains(t.getAttributes().get("concept:name").toString().split("_")[0])) {prefixes.add(t.getAttributes().get("concept:name").toString().split("_")[0]);}
-			//}
-			boolean satisfied = false;
+	List<String> prefixes = new ArrayList<>();
 
-			for ( String v : values ) {
-			    if ( t.getAttributes().get(attribute).toString().contains(v) ) {
-				XAttribute xa = factory.createAttributeLiteral(newAttribute, filename, null);
-				t.getAttributes().put(newAttribute, xa);
-				satisfied = true;
-			    }
-			}
+	for ( String filename : logs.keySet() ) {
+	    for ( XLog l : logs.get(filename) ) {
+		for ( XTrace t : l ) {
+		    //if (t.getAttributes().get("concept:name").toString().contains("_")) {
+		    //if (!prefixes.contains(t.getAttributes().get("concept:name").toString().split("_")[0])) {prefixes.add(t.getAttributes().get("concept:name").toString().split("_")[0]);}
+		    //}
+		    boolean satisfied = false;
 
-			if ( !satisfied ) {
-			    XAttribute xa = factory.createAttributeLiteral(newAttribute, defaultValue, null);
+		    for ( String v : values ) {
+			if ( t.getAttributes().get(attribute).toString().contains(v) ) {
+			    XAttribute xa = factory.createAttributeLiteral(newAttribute, filename, null);
 			    t.getAttributes().put(newAttribute, xa);
+			    satisfied = true;
 			}
-
-			result.add(t);
 		    }
+
+		    if ( !satisfied ) {
+			XAttribute xa = factory.createAttributeLiteral(newAttribute, defaultValue, null);
+			t.getAttributes().put(newAttribute, xa);
+		    }
+
+		    result.add(t);
 		}
 	    }
-
-	    XesXmlSerializer serializer = new XesXmlSerializer();
-	    serializer.serialize(result, os);
-
-	    System.out.println(prefixes);
 	}
+
+	XesXmlSerializer serializer = new XesXmlSerializer();
+	serializer.serialize(result, os);
+
+	System.out.println(prefixes);
+    }
+
 }
